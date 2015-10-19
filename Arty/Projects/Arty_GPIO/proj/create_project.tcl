@@ -20,6 +20,9 @@ set orig_proj_dir "[file normalize "$origin_dir/proj"]"
 set src_dir $origin_dir/src
 set repo_dir $origin_dir/repo
 
+# Set the board part number
+set part_num "xc7a35ticsg324-1L"
+
 # Create project
 create_project $proj_name $dest_dir
 
@@ -29,7 +32,7 @@ set proj_dir [get_property directory [current_project]]
 # Set project properties
 set obj [get_projects $proj_name]
 set_property "default_lib" "xil_defaultlib" $obj
-set_property "part" "xc7a35ticsg324-1L" $obj
+set_property "part" "$part_num" $obj
 set_property "simulator_language" "Mixed" $obj
 set_property "target_language" "VHDL" $obj
 
@@ -44,14 +47,14 @@ if {[string equal [get_filesets -quiet constrs_1] ""]} {
 }
 
 # Set IP repository paths
-#set obj [get_filesets sources_1]
-#set_property "ip_repo_paths" "[file normalize $repo_dir]" $obj
+set obj [get_filesets sources_1]
+set_property "ip_repo_paths" "[file normalize $repo_dir]" $obj
 
 # Add conventional sources
 add_files -quiet $src_dir/hdl
 
 # Add IPs
-#add_files -quiet [glob -nocomplain ../src/ip/*/*.xci]
+add_files -quiet [glob -nocomplain ../src/ip/*/*.xci]
 
 # Add constraints
 add_files -fileset constrs_1 -quiet $src_dir/constraints
@@ -61,13 +64,13 @@ add_files -fileset constrs_1 -quiet $src_dir/constraints
 
 # Create 'synth_1' run (if not found)
 if {[string equal [get_runs -quiet synth_1] ""]} {
-  create_run -name synth_1 -part xc7a35ticsg324-1L -flow {Vivado Synthesis 2014} -strategy "Flow_PerfOptimized_High" -constrset constrs_1
+  create_run -name synth_1 -part $part_num -flow {Vivado Synthesis 2014} -strategy "Flow_PerfOptimized_High" -constrset constrs_1
 } else {
   set_property strategy "Flow_PerfOptimized_High" [get_runs synth_1]
   set_property flow "Vivado Synthesis 2014" [get_runs synth_1]
 }
 set obj [get_runs synth_1]
-set_property "part" "xc7a35ticsg324-1L" $obj
+set_property "part" "$part_num" $obj
 set_property "steps.synth_design.args.fanout_limit" "400" $obj
 set_property "steps.synth_design.args.fsm_extraction" "one_hot" $obj
 set_property "steps.synth_design.args.keep_equivalent_registers" "1" $obj
@@ -80,19 +83,19 @@ current_run -synthesis [get_runs synth_1]
 
 # Create 'impl_1' run (if not found)
 if {[string equal [get_runs -quiet impl_1] ""]} {
-  create_run -name impl_1 -part xc7a35ticsg324-1L -flow {Vivado Implementation 2014} -strategy "Vivado Implementation Defaults" -constrset constrs_1 -parent_run synth_1
+  create_run -name impl_1 -part $part_num -flow {Vivado Implementation 2014} -strategy "Vivado Implementation Defaults" -constrset constrs_1 -parent_run synth_1
 } else {
   set_property strategy "Vivado Implementation Defaults" [get_runs impl_1]
   set_property flow "Vivado Implementation 2014" [get_runs impl_1]
 }
 set obj [get_runs impl_1]
-set_property "part" "xc7a35ticsg324-1L" $obj
+set_property "part" "$part_num" $obj
 set_property "steps.write_bitstream.args.bin_file" "1" $obj
 
 # set the current impl run
 current_run -implementation [get_runs impl_1]
 
-puts "INFO: Project created:$proj_name"
+#puts "INFO: Project created:$proj_name"
 
 # Comment the following section, if there is no block design
 # Create block design
